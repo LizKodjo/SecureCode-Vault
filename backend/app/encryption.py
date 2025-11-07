@@ -45,6 +45,6 @@ try:
 except ValueError as e:
     print(f"⚠️ Encryption service initialisation failed: {e}")
     print(
-        f"⚠️ Encryption will not be available . Set ENCRYPTION_KEY environment variable."
+        "⚠️ Encryption will not be available . Set ENCRYPTION_KEY environment variable."
     )
     encryption_service = None
