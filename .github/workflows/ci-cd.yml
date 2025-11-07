@@ -18,11 +18,11 @@ jobs:
     env:
       DATABASE_URL: "sqlite:///:memory:"
       REDIS_URL: "redis://localhost:6379"
-      SECRET_KEY: "4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88"
-      JWT_SECRET_KEY: "b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251"
+      SECRET_KEY: ${{secrets.SECRET_KEY}}
+      JWT_SECRET_KEY: "${{secrets.JWT_SECRET_KEY}}"
       JWT_ALGORITHM: "HS256"
       JWT_EXPIRE_MINUTES: "30"
-      ENCRYPTION_KEY: "3dd47bd4c77b6db0611fa4e05562eb6b"
+      ENCRYPTION_KEY: ${{secrets.ENCRYPTION_KEY}}
 
     steps:
       - name: Checkout code
@@ -69,11 +69,11 @@ jobs:
     env:
       DATABASE_URL: "sqlite:///:memory:"
       REDIS_URL: redis://localhost:6379
-      SECRET_KEY: 4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88
-      JWT_SECRET_KEY: b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251
+      SECRET_KEY: ${{secrets.SECRET_KEY}}
+      JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
       JWT_ALGORITHM: HS256
       JWT_EXPIRE_MINUTES: 30
-      ENCRYPTION_KEY: 3dd47bd4c77b6db0611fa4e05562eb6b
+      ENCRYPTION_KEY: ${{secrets.ENCRYPTION_KEY}}
 
     steps:
       - name: Checkout code
