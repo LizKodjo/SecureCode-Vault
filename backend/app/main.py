@@ -20,25 +20,34 @@ except ValueError as e:
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title='SecureCode Vault API',
-              description='A secure platform for code snippet management', version='1.0.0')
+app = FastAPI(
+    title="SecureCode Vault API",
+    description="A secure platform for code snippet management",
+    version="1.0.0",
+)
 
 # Add audit middleware
 
 
-@app.middleware('http')
+@app.middleware("http")
 async def add_audit_middleware(request: Request, call_next):
     return await audit_middleware(request, call_next)
 
+
 # CORS middleware
 app.add_middleware(
-    CORSMiddleware, allow_origins=[
-        "http://localhost:3000", "http://frontend:3000", ],
-    allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://frontend:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
-@app.get('/')
+@app.get("/")
 async def root():
     return {"message": "Welcome to SecureCode Vault API"}
 
@@ -64,11 +73,10 @@ async def health_check():
             "status": "healthy",
             "database": "connected",
             "encryption": "working",
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Service unhealthy: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Service unhealthy: {str(e)}")
 
 
 @app.get("/test/encryption")
@@ -83,11 +91,11 @@ async def test_encryption():
             "original": test_data,
             "encrypted": encrypted,
             "decrypted": decrypted,
-            "success": decrypted == test_data
+            "success": decrypted == test_data,
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Encryption test failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Encryption test failed: {str(e)}")
+
 
 # Authenticate endpoints
 
@@ -97,107 +105,168 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
+        )
 
     new_user = crud.create_user(db=db, user=user)
     # Log the registration
-    crud.create_audit_log(db, new_user.id, "REGISTER",
-                          "USER", new_user.id, "User registered")
+    crud.create_audit_log(
+        db, new_user.id, "REGISTER", "USER", new_user.id, "User registered"
+    )
     return new_user
 
 
-@app.post('/auth/login', response_model=schemas.Token)
+@app.post("/auth/login", response_model=schemas.Token)
 def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
     user = auth.authenticate_user(db, user_data.email, user_data.password)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Incorrect email or password", headers={"WWW-Authenticate": "Bearer"},)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     access_token = auth.create_access_token(data={"sub": str(user.id)})
     # Log the login
-    crud.create_audit_log(db, user.id, "LOGIN", "USER",
-                          user.id, "User logged in")
+    crud.create_audit_log(db, user.id, "LOGIN", "USER", user.id, "User logged in")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 # Protected endpoints
 @app.post("/snippets", response_model=schemas.SnippetResponse)
-def create_snippet(snippet: schemas.SnippetCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def create_snippet(
+    snippet: schemas.SnippetCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     new_snippet = crud.create_snippet(
-        db=db, snippet=snippet, user_id=current_user.id, encryption_service=encryption_service)
+        db=db,
+        snippet=snippet,
+        user_id=current_user.id,
+        encryption_service=encryption_service,
+    )
     # Log snippet creation
-    crud.create_audit_log(db, current_user.id, "CREATE", "SNIPPET",
-                          new_snippet.id, f"Snippet created: {snippet.title}")
+    crud.create_audit_log(
+        db,
+        current_user.id,
+        "CREATE",
+        "SNIPPET",
+        new_snippet.id,
+        f"Snippet created: {snippet.title}",
+    )
     return new_snippet
 
 
-@app.get('/snippets', response_model=List[schemas.SnippetResponse])
-def get_my_snippets(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+@app.get("/snippets", response_model=List[schemas.SnippetResponse])
+def get_my_snippets(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     # Get user's snippets
     snippets = crud.get_user_snippets(db, user_id=current_user.id)
     # Log snippet access
-    crud.create_audit_log(db, current_user.id, "READ",
-                          "SNIPPET", None, "Accessed snippets list")
+    crud.create_audit_log(
+        db, current_user.id, "READ", "SNIPPET", None, "Accessed snippets list"
+    )
     return snippets
 
 
-@app.get('/snippets/{snippet_id}', response_model=schemas.SnippetResponse)
-def get_snippet(snippet_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+@app.get("/snippets/{snippet_id}", response_model=schemas.SnippetResponse)
+def get_snippet(
+    snippet_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     snippet = crud.get_snippet_by_id(db, snippet_id, current_user.id)
     if not snippet:
         raise HTTPException(status_code=404, detail="Snippet not found")
     # Log specific snippet access
-    crud.create_audit_log(db, current_user.id, "READ",
-                          "SNIPPET", snippet_id, f"Accessed: {snippet.title}")
+    crud.create_audit_log(
+        db, current_user.id, "READ", "SNIPPET", snippet_id, f"Accessed: {snippet.title}"
+    )
     return snippet
 
 
 @app.delete("/snippets/{snippet_id}")
-def delete_snippet(snippet_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def delete_snippet(
+    snippet_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     snippet = crud.get_snippet_by_id(db, snippet_id, current_user.id)
     if not snippet:
         raise HTTPException(status_code=404, detail="Snippet not found")
     db.delete(snippet)
     db.commit()
     # Log snippet deletion
-    crud.create_audit_log(db, current_user.id, "DELETE", "SNIPPET",
-                          snippet_id, f"Deleted snippet: {snippet.title}")
+    crud.create_audit_log(
+        db,
+        current_user.id,
+        "DELETE",
+        "SNIPPET",
+        snippet_id,
+        f"Deleted snippet: {snippet.title}",
+    )
     return {"message": "Snippet deleted successfully"}
+
 
 # Share endpoints
 
 
 @app.post("/snippets/{snippet_id}/share", response_model=schemas.ShareLinkResponse)
-def create_share_link(snippet_id: int, share_data: schemas.ShareLinkCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    share_link = crud.create_share_link(db=db, snippet_id=snippet_id, user_id=current_user.id,
-                                        expires_hours=share_data.expires_hours, password=share_data.password)
+def create_share_link(
+    snippet_id: int,
+    share_data: schemas.ShareLinkCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    share_link = crud.create_share_link(
+        db=db,
+        snippet_id=snippet_id,
+        user_id=current_user.id,
+        expires_hours=share_data.expires_hours,
+        password=share_data.password,
+    )
 
     if not share_link:
         raise HTTPException(
-            status_code=404, detail="Snippet not found or access denied")
+            status_code=404, detail="Snippet not found or access denied"
+        )
 
     # Log share creation
-    crud.create_audit_log(db, current_user.id, "SHARE", "SNIPPET",
-                          snippet_id, f"Created share link for snippet: {share_link.token}")
+    crud.create_audit_log(
+        db,
+        current_user.id,
+        "SHARE",
+        "SNIPPET",
+        snippet_id,
+        f"Created share link for snippet: {share_link.token}",
+    )
 
     return share_link
 
 
 @app.get("/shared/{token}", response_model=schemas.SharedSnippetResponse)
-def access_shared_snippet(token: str, access_data: Optional[schemas.ShareAccessRequest] = None, db: Session = Depends(get_db)):
+def access_shared_snippet(
+    token: str,
+    access_data: Optional[schemas.ShareAccessRequest] = None,
+    db: Session = Depends(get_db),
+):
     share_link = crud.get_share_link_by_token(db, token)
     if not share_link:
-        raise HTTPException(
-            status_code=404, detail="Shared link not found or expired")
+        raise HTTPException(status_code=404, detail="Shared link not found or expired")
 
     # Check password is required
     if share_link.password_hash:
         if not access_data or not access_data.password:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Password required to access this shared snippet")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Password required to access this shared snippet",
+            )
 
         if not crud.verify_share_password(db, share_link.id, access_data.password):
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password"
+            )
 
     snippet = crud.get_snippet_by_id_any_owner(db, share_link.snippet_id)
     if not snippet:
@@ -210,12 +279,23 @@ def access_shared_snippet(token: str, access_data: Optional[schemas.ShareAccessR
         raise HTTPException(status_code=500, detail="Error decrypting snippet")
 
     # Log shared access (anonymous)
-    crud.create_audit_log(db, None, "SHARED_ACCESS", "SNIPPET",
-                          snippet.id, f"Anonymous access via token: {token}")
+    crud.create_audit_log(
+        db,
+        None,
+        "SHARED_ACCESS",
+        "SNIPPET",
+        snippet.id,
+        f"Anonymous access via token: {token}",
+    )
 
-    return schemas.SharedSnippetResponse(title=snippet.title, language=snippet.language, code=decrypted_code, shared_at=share_link.created_at)
+    return schemas.SharedSnippetResponse(
+        title=snippet.title,
+        language=snippet.language,
+        code=decrypted_code,
+        shared_at=share_link.created_at,
+    )
 
 
-@app.get('/users/me', response_model=schemas.UserResponse)
+@app.get("/users/me", response_model=schemas.UserResponse)
 def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user

@@ -13,16 +13,23 @@ def run_tests():
 
     # Set the Python path
     env = os.environ.copy()
-    env['PYTHONPATH'] = '/app'
+    env["PYTHONPATH"] = "/app"
 
     # Run pytest
-    result = subprocess.run([
-        sys.executable, "-m", "pytest",
-        "tests/", "-v",
-        "--cov=app",
-        "--cov-report=html",
-        "--cov-report=term"
-    ], env=env, cwd="/app")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "tests/",
+            "-v",
+            "--cov=app",
+            "--cov-report=html",
+            "--cov-report=term",
+        ],
+        env=env,
+        cwd="/app",
+    )
 
     if result.returncode == 0:
         print("✅ All tests passed!")

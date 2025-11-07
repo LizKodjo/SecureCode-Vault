@@ -12,7 +12,7 @@ from .database import get_db
 from .config import settings
 
 # Password hashing
-pwd_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT Setup
 security = HTTPBearer()
@@ -33,7 +33,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
     try:
         # bcrypt handles password up to 72 bytes
-        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        return bcrypt.checkpw(
+            plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+        )
     except Exception as e:
         print(f"Password verification error: {e}")
         return False
@@ -44,16 +46,16 @@ def get_password_hash(password: str) -> str:
     try:
         validated_password = validate_password(password)
         # bcrypt handles 72 byte limit
-        hashed = bcrypt.hashpw(
-            validated_password.encode('utf-8'), bcrypt.gensalt())
-        return hashed.decode('utf-8')
+        hashed = bcrypt.hashpw(validated_password.encode("utf-8"), bcrypt.gensalt())
+        return hashed.decode("utf-8")
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         print(f"Password hasing error: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error processing password")
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error processing password",
+        )
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -61,12 +63,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + \
-            timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.JWT_EXPIRE_MINUTES
+        )
 
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
-        to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+    )
     return encoded_jwt
 
 
@@ -79,13 +83,22 @@ def authenticate_user(db: Session, email: str, password: str):
     return user
 
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                          detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"},)
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
     try:
-        payload = jwt.decode(credentials.credentials, settings.JWT_SECRET_KEY, algorithms=[
-                             settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            credentials.credentials,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+        )
         user_id: int = payload.get("sub")
         if user_id is None:
             raise credentials_exception

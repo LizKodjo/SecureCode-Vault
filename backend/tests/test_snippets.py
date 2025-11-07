@@ -6,14 +6,10 @@ def test_create_snippet(client, test_user):
     snippet_data = {
         "title": "Test Snippet",
         "language": "python",
-        "code": "print('Hello, World!')"
+        "code": "print('Hello, World!')",
     }
 
-    response = client.post(
-        "/snippets",
-        json=snippet_data,
-        headers=test_user["headers"]
-    )
+    response = client.post("/snippets", json=snippet_data, headers=test_user["headers"])
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == snippet_data["title"]
@@ -29,7 +25,7 @@ def test_get_snippets(client, test_user):
     snippet_data = {
         "title": "Test Snippet",
         "language": "python",
-        "code": "print('Hello, World!')"
+        "code": "print('Hello, World!')",
     }
 
     client.post("/snippets", json=snippet_data, headers=test_user["headers"])
@@ -49,21 +45,16 @@ def test_get_specific_snippet(client, test_user):
     snippet_data = {
         "title": "Specific Snippet",
         "language": "python",
-        "code": "def test(): pass"
+        "code": "def test(): pass",
     }
 
     create_response = client.post(
-        "/snippets",
-        json=snippet_data,
-        headers=test_user["headers"]
+        "/snippets", json=snippet_data, headers=test_user["headers"]
     )
     snippet_id = create_response.json()["id"]
 
     # Get the specific snippet
-    response = client.get(
-        f"/snippets/{snippet_id}",
-        headers=test_user["headers"]
-    )
+    response = client.get(f"/snippets/{snippet_id}", headers=test_user["headers"])
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == snippet_id
@@ -76,29 +67,21 @@ def test_delete_snippet(client, test_user):
     snippet_data = {
         "title": "To Delete",
         "language": "python",
-        "code": "print('delete me')"
+        "code": "print('delete me')",
     }
 
     create_response = client.post(
-        "/snippets",
-        json=snippet_data,
-        headers=test_user["headers"]
+        "/snippets", json=snippet_data, headers=test_user["headers"]
     )
     snippet_id = create_response.json()["id"]
 
     # Delete the snippet
-    response = client.delete(
-        f"/snippets/{snippet_id}",
-        headers=test_user["headers"]
-    )
+    response = client.delete(f"/snippets/{snippet_id}", headers=test_user["headers"])
     assert response.status_code == 200
     assert response.json()["message"] == "Snippet deleted successfully"
 
     # Verify it's gone
-    response = client.get(
-        f"/snippets/{snippet_id}",
-        headers=test_user["headers"]
-    )
+    response = client.get(f"/snippets/{snippet_id}", headers=test_user["headers"])
     assert response.status_code == 404
 
 
@@ -108,25 +91,19 @@ def test_create_share_link(client, test_user):
     snippet_data = {
         "title": "Share Test",
         "language": "python",
-        "code": "print('shared code')"
+        "code": "print('shared code')",
     }
 
     create_response = client.post(
-        "/snippets",
-        json=snippet_data,
-        headers=test_user["headers"]
+        "/snippets", json=snippet_data, headers=test_user["headers"]
     )
     snippet_id = create_response.json()["id"]
 
     # Create share link
-    share_data = {
-        "expires_hours": 24
-    }
+    share_data = {"expires_hours": 24}
 
     response = client.post(
-        f"/snippets/{snippet_id}/share",
-        json=share_data,
-        headers=test_user["headers"]
+        f"/snippets/{snippet_id}/share", json=share_data, headers=test_user["headers"]
     )
 
     # Debug
@@ -147,20 +124,18 @@ def test_access_shared_snippet(client, test_user):
     snippet_data = {
         "title": "Shared Snippet",
         "language": "python",
-        "code": "print('shared content')"
+        "code": "print('shared content')",
     }
 
     create_response = client.post(
-        "/snippets",
-        json=snippet_data,
-        headers=test_user["headers"]
+        "/snippets", json=snippet_data, headers=test_user["headers"]
     )
     snippet_id = create_response.json()["id"]
 
     share_response = client.post(
         f"/snippets/{snippet_id}/share",
         json={"expires_hours": 24},
-        headers=test_user["headers"]
+        headers=test_user["headers"],
     )
     share_token = share_response.json()["token"]
 

@@ -38,17 +38,14 @@ def test_create_access_token():
 
 def test_authenticate_user(db_session, test_user):
     """Test user authentication"""
-    user = auth.authenticate_user(
-        db_session, test_user["email"], test_user["password"])
+    user = auth.authenticate_user(db_session, test_user["email"], test_user["password"])
     assert user is not None
     assert user.email == test_user["email"]
 
     # Test wrong password
-    user = auth.authenticate_user(
-        db_session, test_user["email"], "wrongpassword")
+    user = auth.authenticate_user(db_session, test_user["email"], "wrongpassword")
     assert user is False
 
     # Test non-existent user
-    user = auth.authenticate_user(
-        db_session, "nonexistent@example.com", "anypassword")
+    user = auth.authenticate_user(db_session, "nonexistent@example.com", "anypassword")
     assert user is False

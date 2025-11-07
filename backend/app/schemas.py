@@ -12,14 +12,14 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-    @field_validator('password')
+    @field_validator("password")
     def validate_password(cls, v):
         if not v or len(v.strip()) == 0:
-            raise ValueError('Password cannot be empty')
+            raise ValueError("Password cannot be empty")
         if len(v) < 6:
-            raise ValueError('Password must be at least 6 characters long')
+            raise ValueError("Password must be at least 6 characters long")
         if len(v) > 100:
-            raise ValueError('Password must be less than 100 characters')
+            raise ValueError("Password must be less than 100 characters")
         return v
 
 
@@ -35,6 +35,7 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
 
+
 # Token Schemas
 
 
@@ -45,6 +46,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     user_id: Optional[int] = None
+
 
 # Snippet schemas
 

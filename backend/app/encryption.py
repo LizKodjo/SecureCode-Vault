@@ -9,10 +9,13 @@ from .config import settings
 class EncryptionService:
     def __init__(self):
         # Derive a Fernet key from our encryption key
-        kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32,
-                         salt=b'securecode_vault_salt', iterations=100000,)
-        key = base64.urlsafe_b64encode(
-            kdf.derive(settings.ENCRYPTION_KEY.encode()))
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=b"securecode_vault_salt",
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(settings.ENCRYPTION_KEY.encode()))
         self.fernet = Fernet(key)
 
     def encrypt(self, data: str) -> str:

@@ -10,7 +10,7 @@ async def audit_middleware(request: Request, call_next):
     start_time = time.time()
 
     # Skip health checks and docs
-    if request.url.path in ['/health', '/docs', '/redoc', '/openapi.json']:
+    if request.url.path in ["/health", "/docs", "/redoc", "/openapi.json"]:
         response = await call_next(request)
         return response
 
@@ -20,8 +20,8 @@ async def audit_middleware(request: Request, call_next):
 
         # Extract user ID from token if available
         user_id = None
-        auth_header = request.headers.get('authorization')
-        if auth_header and auth_header.startswith('Bearer '):
+        auth_header = request.headers.get("authorization")
+        if auth_header and auth_header.startswith("Bearer "):
             try:
                 # For now, I will log with user context for public endpoints
                 pass

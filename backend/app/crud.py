@@ -23,12 +23,19 @@ def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 
-def create_snippet(db: Session, snippet: schemas.SnippetCreate, user_id: int, encryption_service):
+def create_snippet(
+    db: Session, snippet: schemas.SnippetCreate, user_id: int, encryption_service
+):
     # Encrypt the code before storing
     encrypted_code = encryption_service.encrypt(snippet.code)
 
-    db_snippet = models.Snippet(title=snippet.title, language=snippet.language,
-                                code=snippet.code, encrypted_code=encrypted_code, user_id=user_id)
+    db_snippet = models.Snippet(
+        title=snippet.title,
+        language=snippet.language,
+        code=snippet.code,
+        encrypted_code=encrypted_code,
+        user_id=user_id,
+    )
     db.add(db_snippet)
     db.commit()
     db.refresh(db_snippet)
@@ -40,7 +47,11 @@ def get_user_snippets(db: Session, user_id: int):
 
 
 def get_snippet_by_id(db: Session, snippet_id: int, user_id: int):
-    return db.query(models.Snippet).filter(models.Snippet.id == snippet_id, models.Snippet.user_id == user_id).first()
+    return (
+        db.query(models.Snippet)
+        .filter(models.Snippet.id == snippet_id, models.Snippet.user_id == user_id)
+        .first()
+    )
 
 
 def get_snippet_by_id_any_owner(db: Session, snippet_id: int):
@@ -50,10 +61,16 @@ def get_snippet_by_id_any_owner(db: Session, snippet_id: int):
 def generate_share_token():
     """Generate a secure random token for sharing"""
     alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for _ in range(32))
+    return "".join(secrets.choice(alphabet) for _ in range(32))
 
 
-def create_share_link(db: Session, snippet_id: int, user_id: int, expires_hours: int = 24, password: str = None):
+def create_share_link(
+    db: Session,
+    snippet_id: int,
+    user_id: int,
+    expires_hours: int = 24,
+    password: str = None,
+):
     """Create a shareable link for a snippet"""
     # Verify the user owns the snippet
     snippet = get_snippet_by_id(db, snippet_id, user_id)
@@ -61,11 +78,19 @@ def create_share_link(db: Session, snippet_id: int, user_id: int, expires_hours:
         return None
 
     token = generate_share_token()
-    expires_at = datetime.now(
-        timezone.utc) + timedelta(hours=expires_hours) if expires_hours else None
+    expires_at = (
+        datetime.now(timezone.utc) + timedelta(hours=expires_hours)
+        if expires_hours
+        else None
+    )
 
-    share_link = models.ShareLink(snippet_id=snippet_id, token=token, expires_at=expires_at,
-                                  password_hash=auth.get_password_hash(password) if password else None, is_active=True)
+    share_link = models.ShareLink(
+        snippet_id=snippet_id,
+        token=token,
+        expires_at=expires_at,
+        password_hash=auth.get_password_hash(password) if password else None,
+        is_active=True,
+    )
     db.add(share_link)
     db.commit()
     db.refresh(share_link)
@@ -74,8 +99,11 @@ def create_share_link(db: Session, snippet_id: int, user_id: int, expires_hours:
 
 def get_share_link_by_token(db: Session, token: str):
     """Get a share link by token, checking if it's valid"""
-    share_link = db.query(models.ShareLink).filter(
-        models.ShareLink.token == token, models.ShareLink.is_active == True).first()
+    share_link = (
+        db.query(models.ShareLink)
+        .filter(models.ShareLink.token == token, models.ShareLink.is_active == True)
+        .first()
+    )
 
     if not share_link:
         return None
@@ -95,18 +123,31 @@ def get_share_link_by_token(db: Session, token: str):
 
 def verify_share_password(db: Session, share_link_id: int, password: str):
     """Verify password for a share link"""
-    share_link = db.query(models.ShareLink).filter(
-        models.ShareLink.id == share_link_id).first()
+    share_link = (
+        db.query(models.ShareLink).filter(models.ShareLink.id == share_link_id).first()
+    )
     if not share_link or not share_link.password_hash:
         return False
 
     return auth.verify_password(password, share_link.password_hash)
 
 
-def create_audit_log(db: Session, user_id: int, action: str, resource_type: str, resource_id: int = None, details: str = None):
+def create_audit_log(
+    db: Session,
+    user_id: int,
+    action: str,
+    resource_type: str,
+    resource_id: int = None,
+    details: str = None,
+):
     """Create an audit log entry"""
-    audit_log = models.AuditLog(user_id=user_id, action=action,
-                                resource_type=resource_type, resource_id=resource_id, details=details)
+    audit_log = models.AuditLog(
+        user_id=user_id,
+        action=action,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        details=details,
+    )
     db.add(audit_log)
     db.commit()
     return audit_log

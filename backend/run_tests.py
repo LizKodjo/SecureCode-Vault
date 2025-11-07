@@ -11,13 +11,19 @@ def run_tests():
     print("🚀 Running SecureCode Vault Tests...")
 
     # Run pytest with the app directory in Python path
-    result = subprocess.run([
-        sys.executable, "-m", "pytest",
-        "tests/", "-v",
-        "--cov=app",
-        "--cov-report=html",
-        "--cov-report=term"
-    ], cwd=".")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "tests/",
+            "-v",
+            "--cov=app",
+            "--cov-report=html",
+            "--cov-report=term",
+        ],
+        cwd=".",
+    )
 
     if result.returncode == 0:
         print("✅ All tests passed!")

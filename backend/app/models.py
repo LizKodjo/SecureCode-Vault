@@ -20,16 +20,16 @@ class Snippet(Base):
     language = Column(String(50), nullable=False)
     code = Column(Text, nullable=False)
     encrypted_code = Column(Text, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
 class ShareLink(Base):
-    __tablename__ = 'share_links'
+    __tablename__ = "share_links"
 
     id = Column(Integer, primary_key=True, index=True)
-    snippet_id = Column(Integer, ForeignKey('snippets.id'), nullable=False)
+    snippet_id = Column(Integer, ForeignKey("snippets.id"), nullable=False)
     token = Column(String(100), unique=True, index=True, nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=True)
     password_hash = Column(String(255), nullable=True)
@@ -41,7 +41,7 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     action = Column(String(50), nullable=False)
     resource_type = Column(String(50), nullable=False)
     resource_id = Column(Integer, nullable=True)

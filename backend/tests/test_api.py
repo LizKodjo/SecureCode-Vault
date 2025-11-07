@@ -13,10 +13,7 @@ def test_health_check(client):
 
 def test_register_user(client):
     """Test user registration"""
-    user_data = {
-        "email": "newuser@example.com",
-        "password": "newpass123"
-    }
+    user_data = {"email": "newuser@example.com", "password": "newpass123"}
 
     response = client.post("/auth/register", json=user_data)
     assert response.status_code == 200
@@ -28,10 +25,7 @@ def test_register_user(client):
 
 def test_register_duplicate_user(client, test_user):
     """Test duplicate user registration"""
-    user_data = {
-        "email": test_user["email"],
-        "password": "anypassword"
-    }
+    user_data = {"email": test_user["email"], "password": "anypassword"}
 
     response = client.post("/auth/register", json=user_data)
     assert response.status_code == 400
@@ -40,10 +34,7 @@ def test_register_duplicate_user(client, test_user):
 
 def test_login_user(client, test_user):
     """Test user login"""
-    login_data = {
-        "email": test_user["email"],
-        "password": test_user["password"]
-    }
+    login_data = {"email": test_user["email"], "password": test_user["password"]}
 
     response = client.post("/auth/login", json=login_data)
     assert response.status_code == 200
@@ -54,10 +45,7 @@ def test_login_user(client, test_user):
 
 def test_login_invalid_credentials(client):
     """Test login with invalid credentials"""
-    login_data = {
-        "email": "nonexistent@example.com",
-        "password": "wrongpass"
-    }
+    login_data = {"email": "nonexistent@example.com", "password": "wrongpass"}
 
     response = client.post("/auth/login", json=login_data)
     assert response.status_code == 401
