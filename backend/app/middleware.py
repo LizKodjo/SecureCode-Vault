@@ -1,4 +1,3 @@
-
 from fastapi import HTTPException, Request
 
 from .database import SessionLocal

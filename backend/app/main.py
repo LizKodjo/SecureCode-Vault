@@ -77,7 +77,8 @@ async def health_check():
         }
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Service unhealthy: {str(e)}") from None
+            status_code=500, detail=f"Service unhealthy: {str(e)}"
+        ) from None
 
 
 @app.get("/test/encryption")
@@ -96,7 +97,8 @@ async def test_encryption():
         }
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Encryption test failed: {str(e)}") from None
+            status_code=500, detail=f"Encryption test failed: {str(e)}"
+        ) from None
 
 
 # Authenticate endpoints
@@ -129,8 +131,7 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
         )
     access_token = auth.create_access_token(data={"sub": str(user.id)})
     # Log the login
-    crud.create_audit_log(db, user.id, "LOGIN", "USER",
-                          user.id, "User logged in")
+    crud.create_audit_log(db, user.id, "LOGIN", "USER", user.id, "User logged in")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -256,8 +257,7 @@ def access_shared_snippet(
 ):
     share_link = crud.get_share_link_by_token(db, token)
     if not share_link:
-        raise HTTPException(
-            status_code=404, detail="Shared link not found or expired")
+        raise HTTPException(status_code=404, detail="Shared link not found or expired")
 
     # Check password is required
     if share_link.password_hash:
@@ -281,7 +281,8 @@ def access_shared_snippet(
         decrypted_code = encryption_service.decrypt(snippet.encrypted_code)
     except Exception:
         raise HTTPException(
-            status_code=500, detail="Error decrypting snippet") from None
+            status_code=500, detail="Error decrypting snippet"
+        ) from None
 
     # Log shared access (anonymous)
     crud.create_audit_log(

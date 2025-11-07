@@ -46,12 +46,12 @@ def get_password_hash(password: str) -> str:
     try:
         validated_password = validate_password(password)
         # bcrypt handles 72 byte limit
-        hashed = bcrypt.hashpw(
-            validated_password.encode("utf-8"), bcrypt.gensalt())
+        hashed = bcrypt.hashpw(validated_password.encode("utf-8"), bcrypt.gensalt())
         return hashed.decode("utf-8")
     except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from None
     except Exception as e:
         print(f"Password hasing error: {e}")
         raise HTTPException(
@@ -65,9 +65,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(UTC) + timedelta(
-            minutes=settings.JWT_EXPIRE_MINUTES
-        )
+        expire = datetime.now(UTC) + timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
