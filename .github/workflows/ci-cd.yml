@@ -22,7 +22,7 @@ jobs:
       JWT_SECRET_KEY: "b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251"
       JWT_ALGORITHM: "HS256"
       JWT_EXPIRE_MINUTES: "30"
-      ENCRYPTION_KEY: "87d7a7dd1b1929d1ad81a97435eff91e131f17e5e785bd6cefbc71980a551029"
+      ENCRYPTION_KEY: "3dd47bd4c77b6db0611fa4e05562eb6b"
 
     steps:
       - name: Checkout code
@@ -73,7 +73,7 @@ jobs:
       JWT_SECRET_KEY: b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251
       JWT_ALGORITHM: HS256
       JWT_EXPIRE_MINUTES: 30
-      ENCRYPTION_KEY: 87d7a7dd1b1929d1ad81a97435eff91e131f17e5e785bd6cefbc71980a551029
+      ENCRYPTION_KEY: 3dd47bd4c77b6db0611fa4e05562eb6b
 
     steps:
       - name: Checkout code
