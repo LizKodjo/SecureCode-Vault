@@ -118,7 +118,7 @@ def test_create_share_link(client, test_user):
     data = response.json()
     assert "token" in data
     assert "expires_at" in data
-    assert data["is_active"] == True
+    assert data["is_active"]
 
 
 def test_access_shared_snippet(client, test_user):

@@ -41,6 +41,10 @@ ignore = [
 "__init__.py" = ["F401"]
 "tests/*" = ["S101"]  # allow use of assert in tests
 
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
 [tool.coverage.run]
 source = ["app"]
 omit = [

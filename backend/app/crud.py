@@ -103,7 +103,7 @@ def get_share_link_by_token(db: Session, token: str):
     """Get a share link by token, checking if it's valid"""
     share_link = (
         db.query(models.ShareLink)
-        .filter(models.ShareLink.token == token, models.ShareLink.is_active == True)
+        .filter(models.ShareLink.token == token, models.ShareLink.is_active)
         .first()
     )
 
