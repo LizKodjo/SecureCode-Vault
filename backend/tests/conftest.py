@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 from app.database import Base, get_db
 from app.main import app
+from tests.mocks import mock_encryption_service
 
 
 
@@ -53,10 +54,23 @@ def client(db_session):
         finally:
             pass
 
+    def override_get_encryption():
+        return mock_encryption_service
+
     app.dependency_overrides[get_db] = override_get_db
+    # Mock the encryption service for tests
+    from app import crud
+    original_create_snippet = crud.create_snippet
+
+    def mock_create_snippet(db, snippet, user_id, encryption_service=None):
+        return original_create_snippet(db, snippet, user_id, mock_encryption_service)
+
+    crud.create_snippet = mock_create_snippet
+
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+    crud.create_snippet = original_create_snippet
 
 
 @pytest.fixture
