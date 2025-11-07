@@ -1,0 +1,27 @@
+# Production dependencies
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-multipart
+python-jose[cryptography]
+cryptography
+redis
+python-dotenv
+alembic
+bcrypt
+pydantic
+email-validator
+passlib
+
+# Development & Testing dependencies
+pytest
+pytest-asyncio
+pytest-cov
+httpx
+black
+ruff
+bandit
+safety
+pre-commit
+coverage
