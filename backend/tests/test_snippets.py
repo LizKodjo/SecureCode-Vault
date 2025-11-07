@@ -136,8 +136,17 @@ def test_access_shared_snippet(client, test_user):
     )
     share_token = share_response.json()["token"]
 
+    # DEBUG: Print the share token
+    print(f"Share token: {share_token}")
+
     # Access the shared snippet
     response = client.get(f"/shared/{share_token}")
+
+    # DEBUG: Print the error details
+    if response.status_code != 200:
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {response.text}")
+
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == snippet_data["title"]

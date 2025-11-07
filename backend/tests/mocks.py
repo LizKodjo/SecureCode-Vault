@@ -10,13 +10,15 @@ class MockEncryptionService:
         print("🔧 Using mock encryption service for testing")
 
     def encrypt(self, data: str) -> str:
-        """Mock encryption - just returns the data with 'encrypted:' prefix"""
-        return f"encrypted:{data}"
+        """Mock encryption - returns a predictable 'encrypted' version"""
+        # For testing, we need this to be reversible
+        return f"mock_encrypted:{data}"
 
     def decrypt(self, encrypted_data: str) -> str:
-        """Mock decryption - removes the 'encrypted:' prefix"""
-        if encrypted_data.startswith("encrypted:"):
-            return encrypted_data[10:]
+        """Mock decryption - reverses the mock encryption"""
+        if encrypted_data.startswith("mock_encrypted:"):
+            return encrypted_data[15:]  # Remove the prefix
+        # If it's not our mock format, return as-is (for already encrypted data)
         return encrypted_data
 
 
