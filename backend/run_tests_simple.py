@@ -2,9 +2,9 @@
 """
 Simple test runner that sets up the environment correctly
 """
+import os
 import subprocess
 import sys
-import os
 
 
 def run_tests():

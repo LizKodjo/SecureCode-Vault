@@ -1,15 +1,15 @@
-from datetime import datetime, timedelta, timezone
-from typing import Optional
-from jose import JWTError, jwt
+from datetime import UTC, datetime, timedelta
+
 import bcrypt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import HTTPException, status, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from . import models
-from .database import get_db
 from .config import settings
+from .database import get_db
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -46,24 +46,26 @@ def get_password_hash(password: str) -> str:
     try:
         validated_password = validate_password(password)
         # bcrypt handles 72 byte limit
-        hashed = bcrypt.hashpw(validated_password.encode("utf-8"), bcrypt.gensalt())
+        hashed = bcrypt.hashpw(
+            validated_password.encode("utf-8"), bcrypt.gensalt())
         return hashed.decode("utf-8")
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None
     except Exception as e:
         print(f"Password hasing error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error processing password",
-        )
+        ) from None
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(
+        expire = datetime.now(UTC) + timedelta(
             minutes=settings.JWT_EXPIRE_MINUTES
         )
 
@@ -103,7 +105,7 @@ async def get_current_user(
         if user_id is None:
             raise credentials_exception
     except JWTError:
-        raise credentials_exception
+        raise credentials_exception from None
 
     user = db.query(models.User).filter(models.User.id == user_id).first()
 

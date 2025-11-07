@@ -1,8 +1,10 @@
-from datetime import datetime, timedelta, timezone
-from sqlalchemy.orm import Session
-from . import models, schemas, auth
 import secrets
 import string
+from datetime import UTC, datetime, timedelta
+
+from sqlalchemy.orm import Session
+
+from . import auth, models, schemas
 
 
 def create_user(db: Session, user: schemas.UserCreate):
@@ -79,7 +81,7 @@ def create_share_link(
 
     token = generate_share_token()
     expires_at = (
-        datetime.now(timezone.utc) + timedelta(hours=expires_hours)
+        datetime.now(UTC) + timedelta(hours=expires_hours)
         if expires_hours
         else None
     )
@@ -110,8 +112,8 @@ def get_share_link_by_token(db: Session, token: str):
 
     # Check if expired
     if share_link.expires_at:
-        expires_at_aware = share_link.expires_at.replace(tzinfo=timezone.utc)
-        current_time_aware = datetime.now(timezone.utc)
+        expires_at_aware = share_link.expires_at.replace(tzinfo=UTC)
+        current_time_aware = datetime.now(UTC)
 
         if expires_at_aware < current_time_aware:
             share_link.is_active = False
@@ -124,7 +126,8 @@ def get_share_link_by_token(db: Session, token: str):
 def verify_share_password(db: Session, share_link_id: int, password: str):
     """Verify password for a share link"""
     share_link = (
-        db.query(models.ShareLink).filter(models.ShareLink.id == share_link_id).first()
+        db.query(models.ShareLink).filter(
+            models.ShareLink.id == share_link_id).first()
     )
     if not share_link or not share_link.password_hash:
         return False

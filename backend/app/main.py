@@ -1,13 +1,14 @@
 from datetime import datetime, timezone
-from fastapi import FastAPI, Depends, HTTPException, status, Request
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from sqlalchemy import text
 from typing import List, Optional
 
-from . import models, schemas, crud, auth
-from .database import SessionLocal, engine, get_db
+from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from . import auth, crud, models, schemas
 from .config import settings
+from .database import SessionLocal, engine, get_db
 from .encryption import encryption_service
 from .middleware import audit_middleware
 
