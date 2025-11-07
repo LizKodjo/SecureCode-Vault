@@ -15,14 +15,14 @@ jobs:
   security-scan:
     name: Security Scanning
     runs-on: ubuntu-latest
-    env: |
-      DATABASE_URL: sqlite:///:memory:
-      REDIS_URL: redis://localhost:6379
-      SECRET_KEY: 4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88
-      JWT_SECRET_KEY: b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251
-      JWT_ALGORITHM: HS256
-      JWT_EXPIRE_MINUTES: 30
-      ENCRYPTION_KEY: 87d7a7dd1b1929d1ad81a97435eff91e131f17e5e785bd6cefbc71980a551029
+    env:
+      - DATABASE_URL: "sqlite:///:memory:"
+      - REDIS_URL: redis://localhost:6379
+      - SECRET_KEY: 4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88
+      - JWT_SECRET_KEY: b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251
+      - JWT_ALGORITHM: HS256
+      - JWT_EXPIRE_MINUTES: 30
+      - ENCRYPTION_KEY: 87d7a7dd1b1929d1ad81a97435eff91e131f17e5e785bd6cefbc71980a551029
 
     steps:
       - name: Checkout code
@@ -66,14 +66,14 @@ jobs:
   code-quality:
     name: Code Quality & Testing
     runs-on: ubuntu-latest
-    env: |
-      DATABASE_URL: sqlite:///:memory:
-      REDIS_URL: redis://localhost:6379
-      SECRET_KEY: 4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88
-      JWT_SECRET_KEY: b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251
-      JWT_ALGORITHM: HS256
-      JWT_EXPIRE_MINUTES: 30
-      ENCRYPTION_KEY: 87d7a7dd1b1929d1ad81a97435eff91e131f17e5e785bd6cefbc71980a551029
+    env:
+      - DATABASE_URL: "sqlite:///:memory:"
+      - REDIS_URL: redis://localhost:6379
+      - SECRET_KEY: 4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88
+      - JWT_SECRET_KEY: b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251
+      - JWT_ALGORITHM: HS256
+      - JWT_EXPIRE_MINUTES: 30
+      - ENCRYPTION_KEY: 87d7a7dd1b1929d1ad81a97435eff91e131f17e5e785bd6cefbc71980a551029
 
     services:
       postgres:
