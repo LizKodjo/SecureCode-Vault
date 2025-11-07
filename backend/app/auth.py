@@ -7,7 +7,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from . import models
 from .database import get_db
 from .config import settings
 
@@ -46,10 +46,12 @@ def get_password_hash(password: str) -> str:
     try:
         validated_password = validate_password(password)
         # bcrypt handles 72 byte limit
-        hashed = bcrypt.hashpw(validated_password.encode("utf-8"), bcrypt.gensalt())
+        hashed = bcrypt.hashpw(
+            validated_password.encode("utf-8"), bcrypt.gensalt())
         return hashed.decode("utf-8")
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         print(f"Password hasing error: {e}")
         raise HTTPException(

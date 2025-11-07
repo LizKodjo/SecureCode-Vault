@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from typing import Optional
 
 load_dotenv()
 
@@ -28,7 +27,8 @@ class Settings:
             "ENCRYPTION": self.ENCRYPTION_KEY,
         }
 
-        missing_vars = [var for var, value in required_vars.items() if not value]
+        missing_vars = [var for var,
+                        value in required_vars.items() if not value]
         if missing_vars:
             raise ValueError(
                 f"Missing required environment variables: {', '.join(missing_vars)}"
@@ -36,7 +36,8 @@ class Settings:
 
         # Validate encryption key length
         if self.ENCRYPTION_KEY and len(self.ENCRYPTION_KEY) != 32:
-            raise ValueError("ENCRYPTION_KEY must be exactly 32 characters long")
+            raise ValueError(
+                "ENCRYPTION_KEY must be exactly 32 characters long")
 
 
 # Create global settings instance

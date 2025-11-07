@@ -1,8 +1,6 @@
 from fastapi import Request, HTTPException
-from sqlalchemy.orm import Session
 import time
 from .database import SessionLocal
-from . import crud
 
 
 async def audit_middleware(request: Request, call_next):

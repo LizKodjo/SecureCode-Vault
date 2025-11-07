@@ -10,7 +10,6 @@ from sqlalchemy import create_engine
 from fastapi.testclient import TestClient
 
 
-from app.config import settings
 from app.database import Base, get_db
 from app.main import app
 
