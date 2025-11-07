@@ -1,4 +1,3 @@
-import pytest
 
 from app.encryption import EncryptionService
 

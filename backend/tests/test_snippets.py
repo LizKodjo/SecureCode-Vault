@@ -1,4 +1,3 @@
-import pytest
 
 
 def test_create_snippet(client, test_user):

@@ -36,7 +36,7 @@ async def audit_middleware(request: Request, call_next):
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise
     finally:
         db.close()

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, EmailStr, field_validator
 
@@ -46,7 +45,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    user_id: Optional[int] = None
+    user_id: int | None = None
 
 
 # Snippet schemas
@@ -66,7 +65,7 @@ class SnippetResponse(SnippetBase):
     id: int
     user_id: int
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: datetime | None
 
     class Config:
         from_attributes = True
@@ -74,8 +73,8 @@ class SnippetResponse(SnippetBase):
 
 class ShareLinkCreate(BaseModel):
     # snippet_id: int
-    expires_hours: Optional[int] = 24
-    password: Optional[str] = None
+    expires_hours: int | None = 24
+    password: str | None = None
 
     class Config:
         from_attributes = True
@@ -84,7 +83,7 @@ class ShareLinkCreate(BaseModel):
 class ShareLinkResponse(BaseModel):
     id: int
     token: str
-    expires_at: Optional[datetime]
+    expires_at: datetime | None
     is_active: bool
     created_at: datetime
 
@@ -100,4 +99,4 @@ class SharedSnippetResponse(BaseModel):
 
 
 class ShareAccessRequest(BaseModel):
-    password: Optional[str] = None
+    password: str | None = None

@@ -1,5 +1,4 @@
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -74,7 +73,7 @@ async def health_check():
             "status": "healthy",
             "database": "connected",
             "encryption": "working",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Service unhealthy: {str(e)}")
@@ -157,7 +156,7 @@ def create_snippet(
     return new_snippet
 
 
-@app.get("/snippets", response_model=List[schemas.SnippetResponse])
+@app.get("/snippets", response_model=list[schemas.SnippetResponse])
 def get_my_snippets(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user),
@@ -249,7 +248,7 @@ def create_share_link(
 @app.get("/shared/{token}", response_model=schemas.SharedSnippetResponse)
 def access_shared_snippet(
     token: str,
-    access_data: Optional[schemas.ShareAccessRequest] = None,
+    access_data: schemas.ShareAccessRequest | None = None,
     db: Session = Depends(get_db),
 ):
     share_link = crud.get_share_link_by_token(db, token)
@@ -276,7 +275,7 @@ def access_shared_snippet(
     # Decrypt the code
     try:
         decrypted_code = encryption_service.decrypt(snippet.encrypted_code)
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Error decrypting snippet")
 
     # Log shared access (anonymous)
