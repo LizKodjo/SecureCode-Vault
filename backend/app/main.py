@@ -139,8 +139,7 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
         )
     access_token = auth.create_access_token(data={"sub": str(user.id)})
     # Log the login
-    crud.create_audit_log(db, user.id, "LOGIN", "USER",
-                          user.id, "User logged in")
+    crud.create_audit_log(db, user.id, "LOGIN", "USER", user.id, "User logged in")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -266,8 +265,7 @@ def access_shared_snippet(
 ):
     share_link = crud.get_share_link_by_token(db, token)
     if not share_link:
-        raise HTTPException(
-            status_code=404, detail="Shared link not found or expired")
+        raise HTTPException(status_code=404, detail="Shared link not found or expired")
 
     # Check password is required
     if share_link.password_hash:

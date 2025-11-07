@@ -15,8 +15,7 @@ class EncryptionService:
 
         # Validate encryption key length
         if len(settings.ENCRYPTION_KEY) != 32:
-            raise ValueError(
-                "ENCRYPTION_KEY must be exactly 32 characters long")
+            raise ValueError("ENCRYPTION_KEY must be exactly 32 characters long")
 
         # Derive a Fernet key from our encryption key
         kdf = PBKDF2HMAC(
@@ -25,8 +24,7 @@ class EncryptionService:
             salt=b"securecode_vault_salt",
             iterations=100000,
         )
-        key = base64.urlsafe_b64encode(
-            kdf.derive(settings.ENCRYPTION_KEY.encode()))
+        key = base64.urlsafe_b64encode(kdf.derive(settings.ENCRYPTION_KEY.encode()))
         self.fernet = Fernet(key)
 
     def encrypt(self, data: str) -> str:
@@ -46,5 +44,7 @@ try:
     encryption_service = EncryptionService()
 except ValueError as e:
     print(f"⚠️ Encryption service initialisation failed: {e}")
-    print(f"⚠️ Encryption will not be available . Set ENCRYPTION_KEY environment variable.")
+    print(
+        f"⚠️ Encryption will not be available . Set ENCRYPTION_KEY environment variable."
+    )
     encryption_service = None
