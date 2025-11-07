@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_create_snippet(client, test_user):
     """Test creating a new snippet"""
     snippet_data = {
@@ -6,7 +9,8 @@ def test_create_snippet(client, test_user):
         "code": "print('Hello, World!')",
     }
 
-    response = client.post("/snippets", json=snippet_data, headers=test_user["headers"])
+    response = client.post("/snippets", json=snippet_data,
+                           headers=test_user["headers"])
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == snippet_data["title"]
@@ -51,7 +55,8 @@ def test_get_specific_snippet(client, test_user):
     snippet_id = create_response.json()["id"]
 
     # Get the specific snippet
-    response = client.get(f"/snippets/{snippet_id}", headers=test_user["headers"])
+    response = client.get(
+        f"/snippets/{snippet_id}", headers=test_user["headers"])
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == snippet_id
@@ -73,12 +78,14 @@ def test_delete_snippet(client, test_user):
     snippet_id = create_response.json()["id"]
 
     # Delete the snippet
-    response = client.delete(f"/snippets/{snippet_id}", headers=test_user["headers"])
+    response = client.delete(
+        f"/snippets/{snippet_id}", headers=test_user["headers"])
     assert response.status_code == 200
     assert response.json()["message"] == "Snippet deleted successfully"
 
     # Verify it's gone
-    response = client.get(f"/snippets/{snippet_id}", headers=test_user["headers"])
+    response = client.get(
+        f"/snippets/{snippet_id}", headers=test_user["headers"])
     assert response.status_code == 404
 
 
