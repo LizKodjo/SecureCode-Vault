@@ -133,14 +133,14 @@ jobs:
 
       - name: Build Docker images
         run: |
-          docker-compose -f docker-compose.yml build
+          docker compose -f docker-compose.yml build
 
       - name: Scan backend image with Trivy
         run: |
-          docker-compose -f docker-compose.yml up -d db redis
-          docker-compose -f docker-compose.yml build backend
+          docker compose -f docker-compose.yml up -d db redis
+          docker compose -f docker-compose.yml build backend
           # Get the image name properly
-          trivy image $(docker images --filter "label=com.docker.compose.service=backend" -q) --format sarif > trivy-sarif.json || true
+          trivy image --security-checks vuln $(docker compose -f docker-compose.yml images backend -q) --format sarif > trivy-sarif.json || true
 
       - name: Upload Trivy SARIF report
         uses: actions/upload-artifact@v4
