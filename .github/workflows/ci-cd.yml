@@ -16,8 +16,8 @@ jobs:
     name: Security Scanning
     runs-on: ubuntu-latest
     env: |
-      DATABASE_URL: 'postgresql://lizkodjo:Fitness101!@127.0.0.1:5432/securevault'
-      REDIS_URL: 'redis://127.0.0.1:6379'
+      DATABASE_URL: 'sqlite:///:memory:'
+      REDIS_URL: 'redis://localhost:6379'
       SECRET_KEY: '4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88'
       JWT_SECRET_KEY: 'b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251'
       JWT_ALGORITHM: 'HS256'
@@ -67,8 +67,8 @@ jobs:
     name: Code Quality & Testing
     runs-on: ubuntu-latest
     env: |
-      DATABASE_URL: 'postgresql://lizkodjo:Fitness101!@127.0.0.1:5432/securevault'
-      REDIS_URL: 'redis://127.0.0.1:6379'
+      DATABASE_URL: 'sqlite:///:memory:'
+      REDIS_URL: 'redis://localhost:6379'
       SECRET_KEY: '4505e9414400c5872ac4b1a350d6d791702c4df3c54b33554cb254b28daf8c88'
       JWT_SECRET_KEY: 'b1e154accbd4704e6af4aa9704f584f24abb591d972dcd12960e05d5c3db8251'
       JWT_ALGORITHM: 'HS256'
