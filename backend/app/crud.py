@@ -28,6 +28,9 @@ def get_user_by_id(db: Session, user_id: int):
 def create_snippet(
     db: Session, snippet: schemas.SnippetCreate, user_id: int, encryption_service
 ):
+    """Create a snippet with encryption if available"""
+    if encryption_service is None:
+        raise ValueError("Encryption service is not available")
     # Encrypt the code before storing
     encrypted_code = encryption_service.encrypt(snippet.code)
 
@@ -81,7 +84,8 @@ def create_share_link(
 
     token = generate_share_token()
     expires_at = (
-        datetime.now(UTC) + timedelta(hours=expires_hours) if expires_hours else None
+        datetime.now(UTC) +
+        timedelta(hours=expires_hours) if expires_hours else None
     )
 
     share_link = models.ShareLink(
@@ -124,7 +128,8 @@ def get_share_link_by_token(db: Session, token: str):
 def verify_share_password(db: Session, share_link_id: int, password: str):
     """Verify password for a share link"""
     share_link = (
-        db.query(models.ShareLink).filter(models.ShareLink.id == share_link_id).first()
+        db.query(models.ShareLink).filter(
+            models.ShareLink.id == share_link_id).first()
     )
     if not share_link or not share_link.password_hash:
         return False
