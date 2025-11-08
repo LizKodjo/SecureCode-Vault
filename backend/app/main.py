@@ -22,14 +22,65 @@ if encryption_service is None:
 else:
     print("✅ Encryption service is available")
 
+    # Add tags for better organization
+tags_metadata = [
+    {
+        "name": "authentication",
+        "description": "User registration and login endpoints",
+    },
+    {
+        "name": "snippets",
+        "description": "Create and manage code snippets",
+    },
+    {
+        "name": "sharing",
+        "description": "Generate and access shared snippets",
+    },
+    {
+        "name": "users",
+        "description": "User profile management",
+    },
+    {
+        "name": "health",
+        "description": "Health checks and service status",
+    },
+]
+
+
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="SecureCode Vault API",
-    description="A secure platform for code snippet management",
+    description="""
+    🔒 SecureCode Vault - A secure platform for code snippet management.
+    
+    ## Features
+    
+    * **User Authentication** - JWT token-based auth
+    * **Encrypted Storage** - Code snippets encrypted at rest
+    * **Secure Sharing** - Expiring, password-protected share links
+    * **Audit Logging** - Comprehensive activity tracking
+    
+    ## Endpoints
+    
+    * **Auth** - User registration and login
+    * **Snippets** - Create, read, and manage code snippets  
+    * **Sharing** - Generate and access shared snippets
+    * **Users** - User profile management
+    """,
     version="1.0.0",
+    contact={
+        "name": "Liz Kodjo",
+        "url": "https://github.com/LizKodjo/SecureCode-Vault",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+    openapi_tags=tags_metadata,
 )
+
 
 # Add audit middleware
 
@@ -55,7 +106,7 @@ async def root():
     return {"message": "Welcome to SecureCode Vault API"}
 
 
-@app.get("/health")
+@app.get("/health", tags=["health"])
 async def health_check():
     """Enhanced health check that verifies all services"""
     try:
@@ -110,7 +161,7 @@ async def test_encryption():
 # Authenticate endpoints
 
 
-@app.post("/auth/register", response_model=schemas.UserResponse)
+@app.post("/auth/register", response_model=schemas.UserResponse, tags=["authentication"])
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
@@ -140,7 +191,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         )
 
 
-@app.post("/auth/login", response_model=schemas.Token)
+@app.post("/auth/login", response_model=schemas.Token, tags=["authentication"])
 def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
     user = auth.authenticate_user(db, user_data.email, user_data.password)
     if not user:
@@ -157,7 +208,7 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
 
 
 # Protected endpoints
-@app.post("/snippets", response_model=schemas.SnippetResponse)
+@app.post("/snippets", response_model=schemas.SnippetResponse, tags=["snippets"])
 def create_snippet(
     snippet: schemas.SnippetCreate,
     db: Session = Depends(get_db),
@@ -181,7 +232,7 @@ def create_snippet(
     return new_snippet
 
 
-@app.get("/snippets", response_model=list[schemas.SnippetResponse])
+@app.get("/snippets", response_model=list[schemas.SnippetResponse], tags=["snippets"])
 def get_my_snippets(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user),
@@ -237,7 +288,7 @@ def delete_snippet(
 # Share endpoints
 
 
-@app.post("/snippets/{snippet_id}/share", response_model=schemas.ShareLinkResponse)
+@app.post("/snippets/{snippet_id}/share", response_model=schemas.ShareLinkResponse, tags=["sharing"])
 def create_share_link(
     snippet_id: int,
     share_data: schemas.ShareLinkCreate,
@@ -270,7 +321,7 @@ def create_share_link(
     return share_link
 
 
-@app.get("/shared/{token}", response_model=schemas.SharedSnippetResponse)
+@app.get("/shared/{token}", response_model=schemas.SharedSnippetResponse, tags=["sharing"])
 def access_shared_snippet(
     token: str,
     access_data: schemas.ShareAccessRequest | None = None,
@@ -331,6 +382,6 @@ def access_shared_snippet(
     )
 
 
-@app.get("/users/me", response_model=schemas.UserResponse)
+@app.get("/users/me", response_model=schemas.UserResponse, tags=["users"])
 def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user

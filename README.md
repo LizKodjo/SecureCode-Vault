@@ -50,3 +50,30 @@ docker-compose up --build
 # Frontend: http://localhost:3000
 # API Docs: http://localhost:8000/docs
 ```
+
+## API Documentation
+
+The SecureCode Vault provides a RESTful API for managing code snippets.
+
+### Interactive Documentation
+
+Once the application is running, visit:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+### Quick Start
+
+1. **Register a user**
+2. **Login to get JWT token**
+3. **Use the token in Authorization header**
+
+### Example Usage
+
+See [API_EXAMPLES.md](API_EXAMPLES.md) for detailed examples using curl and Python.
+
+### Authentication
+
+All endpoints except `/auth/*` and `/shared/*` require JWT authentication.
+
+Include the token in the Authorization header:
