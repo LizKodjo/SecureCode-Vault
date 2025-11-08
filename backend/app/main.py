@@ -54,18 +54,14 @@ app = FastAPI(
     title="SecureCode Vault API",
     description="""
     🔒 SecureCode Vault - A secure platform for code snippet management.
-    
     ## Features
-    
     * **User Authentication** - JWT token-based auth
     * **Encrypted Storage** - Code snippets encrypted at rest
     * **Secure Sharing** - Expiring, password-protected share links
     * **Audit Logging** - Comprehensive activity tracking
-    
     ## Endpoints
-    
     * **Auth** - User registration and login
-    * **Snippets** - Create, read, and manage code snippets  
+    * **Snippets** - Create, read, and manage code snippets
     * **Sharing** - Generate and access shared snippets
     * **Users** - User profile management
     """,
@@ -188,12 +184,12 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         db.refresh(new_user)
         return new_user
 
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creating user",
-        )
+        ) from None
 
 
 @app.post("/auth/login", response_model=schemas.Token, tags=["authentication"])
@@ -207,7 +203,8 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
         )
     access_token = auth.create_access_token(data={"sub": str(user.id)})
     # Log the login
-    crud.create_audit_log(db, user.id, "LOGIN", "USER", user.id, "User logged in")
+    crud.create_audit_log(db, user.id, "LOGIN", "USER",
+                          user.id, "User logged in")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -339,7 +336,8 @@ def access_shared_snippet(
 ):
     share_link = crud.get_share_link_by_token(db, token)
     if not share_link:
-        raise HTTPException(status_code=404, detail="Shared link not found or expired")
+        raise HTTPException(
+            status_code=404, detail="Shared link not found or expired")
 
     # Check password is required
     if share_link.password_hash:
