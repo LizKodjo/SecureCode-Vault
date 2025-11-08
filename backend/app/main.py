@@ -93,8 +93,11 @@ async def add_audit_middleware(request: Request, call_next):
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000",
-                   "http://127.0.0.1:3000", "http://frontend:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://frontend:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -161,20 +164,22 @@ async def test_encryption():
 # Authenticate endpoints
 
 
-@app.post("/auth/register", response_model=schemas.UserResponse, tags=["authentication"])
+@app.post(
+    "/auth/register", response_model=schemas.UserResponse, tags=["authentication"]
+)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
 
     try:
         new_user = crud.create_user(db=db, user=user)
         # Log the registration
-        crud.create_audit_log(db, new_user.id, "REGISTER",
-                              "USER", new_user.id, "User registered")
+        crud.create_audit_log(
+            db, new_user.id, "REGISTER", "USER", new_user.id, "User registered"
+        )
 
         # Commit the transaction explicitly
         db.commit()
@@ -187,7 +192,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error creating user"
+            detail="Error creating user",
         )
 
 
@@ -202,8 +207,7 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
         )
     access_token = auth.create_access_token(data={"sub": str(user.id)})
     # Log the login
-    crud.create_audit_log(db, user.id, "LOGIN", "USER",
-                          user.id, "User logged in")
+    crud.create_audit_log(db, user.id, "LOGIN", "USER", user.id, "User logged in")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -288,7 +292,11 @@ def delete_snippet(
 # Share endpoints
 
 
-@app.post("/snippets/{snippet_id}/share", response_model=schemas.ShareLinkResponse, tags=["sharing"])
+@app.post(
+    "/snippets/{snippet_id}/share",
+    response_model=schemas.ShareLinkResponse,
+    tags=["sharing"],
+)
 def create_share_link(
     snippet_id: int,
     share_data: schemas.ShareLinkCreate,
@@ -321,7 +329,9 @@ def create_share_link(
     return share_link
 
 
-@app.get("/shared/{token}", response_model=schemas.SharedSnippetResponse, tags=["sharing"])
+@app.get(
+    "/shared/{token}", response_model=schemas.SharedSnippetResponse, tags=["sharing"]
+)
 def access_shared_snippet(
     token: str,
     access_data: schemas.ShareAccessRequest | None = None,
@@ -329,8 +339,7 @@ def access_shared_snippet(
 ):
     share_link = crud.get_share_link_by_token(db, token)
     if not share_link:
-        raise HTTPException(
-            status_code=404, detail="Shared link not found or expired")
+        raise HTTPException(status_code=404, detail="Shared link not found or expired")
 
     # Check password is required
     if share_link.password_hash:
