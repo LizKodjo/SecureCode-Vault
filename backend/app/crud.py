@@ -8,12 +8,15 @@ from . import auth, models, schemas
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    # Password validation
+    # The password validation now happens in the schema and auth layers
     hashed_password = auth.get_password_hash(user.password)
-    db_user = models.User(email=user.email, hashed_password=hashed_password)
+    db_user = models.User(
+        email=user.email,
+        hashed_password=hashed_password
+    )
     db.add(db_user)
     db.commit()
-    db.refresh(db_user)
+    db.refresh(db_user)  # This is important to get the ID
     return db_user
 
 
@@ -84,7 +87,8 @@ def create_share_link(
 
     token = generate_share_token()
     expires_at = (
-        datetime.now(UTC) + timedelta(hours=expires_hours) if expires_hours else None
+        datetime.now(UTC) +
+        timedelta(hours=expires_hours) if expires_hours else None
     )
 
     share_link = models.ShareLink(
@@ -127,7 +131,8 @@ def get_share_link_by_token(db: Session, token: str):
 def verify_share_password(db: Session, share_link_id: int, password: str):
     """Verify password for a share link"""
     share_link = (
-        db.query(models.ShareLink).filter(models.ShareLink.id == share_link_id).first()
+        db.query(models.ShareLink).filter(
+            models.ShareLink.id == share_link_id).first()
     )
     if not share_link or not share_link.password_hash:
         return False

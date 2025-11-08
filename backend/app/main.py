@@ -42,10 +42,8 @@ async def add_audit_middleware(request: Request, call_next):
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://frontend:3000",
-    ],
+    allow_origins=["http://localhost:3000",
+                   "http://127.0.0.1:3000", "http://frontend:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -117,15 +115,29 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
         )
 
-    new_user = crud.create_user(db=db, user=user)
-    # Log the registration
-    crud.create_audit_log(
-        db, new_user.id, "REGISTER", "USER", new_user.id, "User registered"
-    )
-    return new_user
+    try:
+        new_user = crud.create_user(db=db, user=user)
+        # Log the registration
+        crud.create_audit_log(db, new_user.id, "REGISTER",
+                              "USER", new_user.id, "User registered")
+
+        # Commit the transaction explicitly
+        db.commit()
+
+        # Refresh to get the complete user object
+        db.refresh(new_user)
+        return new_user
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error creating user"
+        )
 
 
 @app.post("/auth/login", response_model=schemas.Token)
@@ -139,7 +151,8 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
         )
     access_token = auth.create_access_token(data={"sub": str(user.id)})
     # Log the login
-    crud.create_audit_log(db, user.id, "LOGIN", "USER", user.id, "User logged in")
+    crud.create_audit_log(db, user.id, "LOGIN", "USER",
+                          user.id, "User logged in")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -265,7 +278,8 @@ def access_shared_snippet(
 ):
     share_link = crud.get_share_link_by_token(db, token)
     if not share_link:
-        raise HTTPException(status_code=404, detail="Shared link not found or expired")
+        raise HTTPException(
+            status_code=404, detail="Shared link not found or expired")
 
     # Check password is required
     if share_link.password_hash:

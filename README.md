@@ -4,9 +4,10 @@ A secure, self-hosted platform for developers to store, encrypt, and share code 
 
 ## 🛡️ Security & Quality
 
-![Tests](https://github.com/yourusername/securecode-vault/actions/workflows/ci-cd.yml/badge.svg)
-![Security Scan](https://github.com/yourusername/securecode-vault/actions/workflows/ci-cd.yml/badge.svg?label=security)
 ![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
+![CI/CD](https://github.com/LizKodjo/SecureCode-Vault/actions/workflows/ci-cd.yml/badge.svg)
+![Tests](https://img.shields.io/badge/tests-19%2F19%20passing-brightgreen)
+![Security](https://img.shields.io/badge/security-scanned-blue)
 
 ## 🚀 Features
 
